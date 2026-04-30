@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from app.bot.parser import parsear_gasto
-from app.services.expense_service import crear_gasto, obtener_gastos
+from app.services.expense_service import crear_gasto, obtener_gastos, borrar_gastos_mes
 from app.db.database import SessionLocal
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -21,6 +21,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             lineas = [f"• {g.category}: ${g.amount:,.0f}" for g in gastos]
             resumen = "\n".join(lineas) + f"\n\nTotal: ${total:,.0f}"
             await update.message.reply_text(resumen)
+            return
+        
+        # Comando para borrar gastos del mes
+        if texto.lower() in ["/borrar", "borrar"]:
+            eliminados = borrar_gastos_mes(db, chat_id)
+            await update.message.reply_text(
+                f"🗑️ {eliminados} gasto(s) del mes eliminados."
+            )
             return
 
         # Intentar parsear como gasto
